@@ -1,0 +1,79 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.associations": {
+    "*.env*": "dotenv"
+  },
+  "vsicons.presets.nestjs": true,
+  "javascript.preferences.importModuleSpecifier": "relative",
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": false
+  },
+  "eslint.options": {
+    "overrideConfigFile": ".eslintrc.js"
+  },
+  "eslint.codeAction.disableRuleComment": {
+    "enable": true,
+    "location": "separateLine"
+  },
+  "cSpell.words": [
+    "Acces",
+    "accountname",
+    "actl",
+    "APICMDS",
+    "AWSS",
+    "AWSSNS",
+    "bravonj",
+    "Bussiness",
+    "CLICKCORPNEWS",
+    "CMDS",
+    "cmpny",
+    "COREID",
+    "costcenterdprt",
+    "costcenters",
+    "datetime",
+    "dbtype",
+    "downloadexcel",
+    "employeetemp",
+    "Emply",
+    "errcode",
+    "exrtend",
+    "globalemployeeid",
+    "jssdk",
+    "lillyid",
+    "linq",
+    "mainfest",
+    "medicalevent",
+    "metadatas",
+    "nestjs",
+    "newuser",
+    "noauth",
+    "nvarchar",
+    "postgre",
+    "roleclaims",
+    "sameorigin",
+    "shunfeng",
+    "shunfenginfo",
+    "sprvsr",
+    "sqlstring",
+    "Succ",
+    "sysconfig",
+    "tnwx",
+    "typeorm",
+    "userid",
+    "userroles",
+    "wecom",
+    "wecomapi",
+    "weixin",
+    "xlsxdata"
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

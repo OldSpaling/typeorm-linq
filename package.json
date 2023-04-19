@@ -1,0 +1,39 @@
+{
+  "name": "typeorm-linq",
+  "version": "1.0.2",
+  "description": "support linq for typeorm by acorn",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "readmeFilename": "README.md",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "debug": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./dist/test/test.js\"",
+    "build:publish": "tsc -p tsconfig.pub.json",
+    "publish:dry-run": "npm publish --access=public --dry-run=true"
+  },
+  "keywords": [
+    "typeorm",
+    "linq",
+    "type infer"
+  ],
+  "files": [
+    "dist"
+  ],
+  "author": "xnguo",
+  "license": "MIT",
+  "devDependencies": {
+    "@faker-js/faker": "^7.6.0",
+    "@types/node": "^18.15.11",
+    "mssql": "^7.3.5",
+    "pg": "^8.10.0",
+    "reflect-metadata": "^0.1.13",
+    "tsc-watch": "^6.0.0",
+    "typescript": "^4.9.5"
+  },
+  "peerDependencies": {
+    "typeorm": "^0.3.12"
+  },
+  "dependencies": {
+    "acorn": "^8.8.2"
+  }
+}
