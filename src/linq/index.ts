@@ -6,6 +6,7 @@ export * from './store/expression-cache-store';
 export * from './store/interfaces/default-store-option';
 export * from './store/interfaces/file-store-option';
 export * from './store/interfaces/memory-store-option';
+export { ExpressionAggregateFunc } from './parser/expression-parser';
 export function init(config: IConfig) {
   //初始化cache
   ConfigUtil.set(config);
