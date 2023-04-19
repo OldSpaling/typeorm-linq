@@ -9,8 +9,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "debug": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./dist/test/test.js\"",
     "build:publish": "tsc -p tsconfig.pub.json",
-    "publish":"npm publish --access=public",
-    "publish:dry-run": "npm publish --access=public --dry-run=true"
+    "pub":"npm publish --access=public",
+    "pub:dry-run": "npm publish --access=public --dry-run=true"
   },
   "keywords": [
     "typeorm",
