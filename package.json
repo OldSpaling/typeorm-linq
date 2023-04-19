@@ -19,6 +19,14 @@
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OldSpaling/typeorm-linq.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OldSpaling/typeorm-linq/issues"
+  },
+  "homepage": "https://github.com/OldSpaling/typeorm-linq",
   "author": "xnguo",
   "license": "MIT",
   "devDependencies": {
