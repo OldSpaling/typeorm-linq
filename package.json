@@ -48,7 +48,6 @@
   },
   "dependencies": {
     "acorn": "^8.8.2",
-    "camelcase": "^6.3.0",
-    "save-dev": "^0.0.1-security"
+    "camelcase": "^6.3.0"
   }
 }
