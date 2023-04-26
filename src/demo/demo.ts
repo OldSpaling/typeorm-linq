@@ -1,14 +1,14 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { SchoolEntity } from './entities/school.entity';
+import { SchoolEntity } from './entities/pg/school.entity';
 import { faker } from '@faker-js/faker';
-import { TeacherEntity } from './entities/teacher.entity';
-import { ClassesEntity } from './entities/classes.entity';
-import { scheduler } from 'timers/promises';
-import { CourseEntity } from './entities/course.entity';
-import { StudentEntity } from './entities/student.entity';
-import { StudentCourseMappingEntity } from './entities/student-course_mapping.entity';
+import { TeacherEntity } from './entities/pg/teacher.entity';
+import { ClassesEntity } from './entities/pg/classes.entity';
+import { CourseEntity } from './entities/pg/course.entity';
+import { StudentEntity } from './entities/pg/student.entity';
+import { StudentCourseMappingEntity } from './entities/pg/student-course_mapping.entity';
 import { LinqInferQueryBuilder } from '../linq';
 import { ExpressionAggregateFunc } from '../linq/parser/expression-parser';
+import { Actor, Film, FilmActor, Language } from './entities/mysql';
 export class Demo {
   constructor(private readonly option: DataSourceOptions) {}
   async createConn() {
@@ -156,7 +156,7 @@ export class Demo {
       .where(
         ({ cla, stu }) =>
           (!stu.isMale && ExpressionAggregateFunc.len(cla.name) >= 0) ||
-          stu.isMonitor == true,
+          ExpressionAggregateFunc.subQuery('stu.is_header == true'),
       )
       .andWhere(({ sc }) => sc.id == schoolFilter.id, {
         schoolFilterid: schoolFilter.id, //参数名是单纯层级合并
@@ -167,18 +167,54 @@ export class Demo {
         className: cla.name;
         headTeacher: te.firstName + ' ' + te.lastName;
         stuName: stu.firstName + ' ' + stu.lastName;
-      }).toSql();
-      // .getRawMany<{
-      //   schoolName: string;
-      //   className: string;
-      //   headTeacher: string;
-      //   stuName: string;
-      // }>();
+      })
+      .toSql();
+    // .getRawMany<{
+    //   schoolName: string;
+    //   className: string;
+    //   headTeacher: string;
+    //   stuName: string;
+    // }>();
     console.log(query);
     /**
        * SELECT  "sc"."name" "schoolName", "cla"."name" "className", "te"."first_name"||' '||"te"."last_name" "headTeacher", "stu"."first_name"||' '||"stu"."last_name" "stuName" FROM "public"."school" "sc" INNER JOIN "public"."classes" "cla" ON "sc"."id"="cla"."school_id"  LEFT JOIN "public"."student" "stu" ON 
         "stu"."classes_id"="cla"."id"  LEFT JOIN "public"."teacher" "te" ON "cla"."head_teacher_id"="te"."id" WHERE ( ("stu"."is_male" =false and "cla"."name"='8')  or "stu"."is_header"=true)
        */
+  }
+  async testMySql() {
+    const dataSource = await this.createConn();
+    const youngLanguage = 'YOUNG LANGUAGE';
+    const query = await new LinqInferQueryBuilder<Film>(dataSource)
+      .create(Film, 'f')
+      .leftJoinAndSelect(
+        FilmActor,
+        'fac',
+        ({ fac, f }) => fac.filmId == f.filmId,
+      )
+      .leftJoinAndSelect(
+        Actor,
+        'ac',
+        ({ fac, ac }) => fac.actorId == ac.actorId,
+      )
+      .leftJoinAndSelect(
+        Language,
+        'l',
+        ({ l, f }) => l.languageId == f.languageId,
+      )
+      .where(
+        ({ f, ac }) =>
+          (f.title == 'YOUTH KICK' || f.title == youngLanguage) &&
+          ExpressionAggregateFunc.len(ac.firstName + ac.lastName) > 10,
+        { youngLanguage },
+      )
+      .orderBy(({ ac }) => ac.firstName + ac.lastName, 'DESC')
+      .select(({ f, ac, l }) => {
+        filmName: f.title;
+        actorName: ac.firstName + ' ' + ac.lastName;
+        language: l.name;
+      })
+      .getRawMany<{filmName:string,actorName:string,language:string}>();
+    console.log(query);
   }
   async testLinqFrom() {
     const dataSource = await this.createConn();

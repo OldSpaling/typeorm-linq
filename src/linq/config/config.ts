@@ -8,7 +8,7 @@ export interface IConfig {
 }
 export class ConfigUtil {
   private static _config: IConfig;
-  private static supportDB = ['mssql', 'postgres'];
+  private static supportDB = ['mssql', 'postgres','mysql'];
   static set(config: IConfig) {
     if (config.dbType && !ConfigUtil.supportDB.includes(config.dbType)) {
       throw new Error(`not support database ${config.dbType}`);

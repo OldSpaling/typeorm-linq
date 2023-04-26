@@ -2,6 +2,7 @@ import { SourceLocation } from 'acorn';
 import { ConfigUtil } from '../config/config';
 import { MetadataType } from '../linq-infer-query-builder';
 import { SqlIdentityMapping } from './sql-identity-mapping';
+import camelCase from 'camelcase';
 /***
  * 所有expression 都带有表达式的参数列表，便于识别
  */
@@ -44,30 +45,75 @@ export class Expression {
     entityMetadata: MetadataType,
     params?: Expression[],
     parentNodeType?: ExpressionType,
-  ):Expression {
+  ): Expression {
     switch (node.type) {
       case ExpressionType.ArrowFunctionExpression:
         return new ArrowFunctionExpression(node, entityMetadata);
       case ExpressionType.BinaryExpression:
-        return new BinaryExpression(node, entityMetadata, params);;
+        return new BinaryExpression(
+          node,
+          entityMetadata,
+          params,
+          parentNodeType,
+        );
       case ExpressionType.CallExpression:
         return new CallExpression(node, entityMetadata, params, parentNodeType);
       case ExpressionType.LogicalExpression:
-        return new LogicalExpression(node, entityMetadata, params);
+        return new LogicalExpression(
+          node,
+          entityMetadata,
+          params,
+          parentNodeType,
+        );
       case ExpressionType.IdentifierExpression:
-        return new IdentityExpression(node, entityMetadata, params);
+        return new IdentityExpression(
+          node,
+          entityMetadata,
+          params,
+          parentNodeType,
+        );
       case ExpressionType.MemberExpression:
-        return new MemberExpression(node, entityMetadata, params);
+        return new MemberExpression(
+          node,
+          entityMetadata,
+          params,
+          parentNodeType,
+        );
       case ExpressionType.BlockStatementExpression:
-        return new BlockStatementExpression(node, entityMetadata, params);
+        return new BlockStatementExpression(
+          node,
+          entityMetadata,
+          params,
+          parentNodeType,
+        );
       case ExpressionType.LabeldStatementExpression:
-        return new LabeldStatementExpression(node, entityMetadata, params);
+        return new LabeldStatementExpression(
+          node,
+          entityMetadata,
+          params,
+          parentNodeType,
+        );
       case ExpressionType.ExpressionStatementExpression:
-        return new ExpressionStatementExpression(node, entityMetadata, params);
+        return new ExpressionStatementExpression(
+          node,
+          entityMetadata,
+          params,
+          parentNodeType,
+        );
       case ExpressionType.LiteralExpression:
-        return new LiteralExpression(node, entityMetadata, params);
+        return new LiteralExpression(
+          node,
+          entityMetadata,
+          params,
+          parentNodeType,
+        );
       case ExpressionType.UnaryExpression:
-        return new UnaryExpression(node, entityMetadata, params);
+        return new UnaryExpression(
+          node,
+          entityMetadata,
+          params,
+          parentNodeType,
+        );
       default:
         throw new Error(`not support ${node.type} expression`);
     }
@@ -80,8 +126,13 @@ export class Expression {
  */
 export class IdentityExpression extends Expression {
   value: number;
-  constructor(node: any, entityMetadata: MetadataType, params?: Expression[]) {
-    super(node, entityMetadata, params);
+  constructor(
+    node: any,
+    entityMetadata: MetadataType,
+    params?: Expression[],
+    parentNodeType?: ExpressionType,
+  ) {
+    super(node, entityMetadata, params, parentNodeType);
     this.type = 'Identifier';
     this.value = node.value;
   }
@@ -119,12 +170,27 @@ export class LogicalExpression extends Expression {
   left: Expression;
   operator: string;
   right: Expression;
-  constructor(node: any, entityMetadata: MetadataType, params?: Expression[]) {
-    super(node, entityMetadata, params);
+  constructor(
+    node: any,
+    entityMetadata: MetadataType,
+    params?: Expression[],
+    parentNodeType?: ExpressionType,
+  ) {
+    super(node, entityMetadata, params, parentNodeType);
     this.type = 'LogicalExpression';
-    this.left = this.createInstance(node.left, entityMetadata, params);
+    this.left = this.createInstance(
+      node.left,
+      entityMetadata,
+      params,
+      ExpressionType.LogicalExpression,
+    );
     this.operator = node.operator;
-    this.right = this.createInstance(node.right, entityMetadata, params);
+    this.right = this.createInstance(
+      node.right,
+      entityMetadata,
+      params,
+      ExpressionType.LogicalExpression,
+    );
   }
   toString() {
     // ||需要手动添加括号包括，现在处理方式是无论是否是|| 全部用括号包括，
@@ -155,7 +221,9 @@ export class CallExpression extends Expression {
   ) {
     super(node, entityMetadata, params, parentNodeType);
     this.type = ExpressionType.CallExpression;
-    this.callee = <typeof this.callee>this.createInstance(node.callee, entityMetadata, params);
+    this.callee = <typeof this.callee>(
+      this.createInstance(node.callee, entityMetadata, params)
+    );
     if (node.arguments) {
       this.arguments = (<[]>node.arguments).map((o) =>
         this.createInstance(o, entityMetadata, params),
@@ -234,11 +302,28 @@ export class MemberExpression extends Expression {
   object: Expression;
   property: IdentityExpression;
   computed?: boolean;
-  constructor(node: any, entityMetadata: MetadataType, params?: Expression[]) {
-    super(node, entityMetadata, params);
+  constructor(
+    node: any,
+    entityMetadata: MetadataType,
+    params?: Expression[],
+    parentNodeType?: ExpressionType,
+  ) {
+    super(node, entityMetadata, params, parentNodeType);
     this.type = 'MemberExpression';
-    this.object = this.createInstance(node.object, entityMetadata, params);
-    this.property = <typeof this.property>this.createInstance(node.property, entityMetadata, params);
+    this.object = this.createInstance(
+      node.object,
+      entityMetadata,
+      params,
+      ExpressionType.MemberExpression,
+    );
+    this.property = <typeof this.property>(
+      this.createInstance(
+        node.property,
+        entityMetadata,
+        params,
+        ExpressionType.MemberExpression,
+      )
+    );
     this.computed = node.computed;
     if (this.object && this.object instanceof MemberExpression) {
       //聚合函数处理 name修正
@@ -268,13 +353,17 @@ export class MemberExpression extends Expression {
   toString() {
     //a.Id情况并且是参数
     if (this.params?.some((o) => o.name == this.object.name)) {
-      return `"${this.object.name}"."${SqlIdentityMapping.getColumnName(
-        this.property.name!,
-      )}"`;
+      return `${SqlIdentityMapping.wrapDBField(
+        this.object.name,
+      )}.${SqlIdentityMapping.wrapDBField(this.property.name!)}`;
     } else {
       //不是列表参数和外部数组参数
       //eg a.Id-->:aId a[0]-->:a0
-      return `:${this.object.name}${this.property.name || this.property.value}`;
+      const param = camelCase([
+        this.object.name,
+        this.property.name || this.property.value?.toString(),
+      ]);
+      return `:${param}`;
     }
   }
 }
@@ -285,12 +374,27 @@ export class BinaryExpression extends Expression {
   left: Expression;
   operator: string;
   right: Expression;
-  constructor(node: any, entityMetadata: MetadataType, params?: Expression[]) {
-    super(node, entityMetadata, params);
+  constructor(
+    node: any,
+    entityMetadata: MetadataType,
+    params?: Expression[],
+    parentNodeType?: ExpressionType,
+  ) {
+    super(node, entityMetadata, params, parentNodeType);
     this.type = 'BinaryExpression';
-    this.left = this.createInstance(node.left, entityMetadata, params);
+    this.left = this.createInstance(
+      node.left,
+      entityMetadata,
+      params,
+      ExpressionType.BinaryExpression,
+    );
     this.operator = node.operator;
-    this.right = this.createInstance(node.right, entityMetadata, params);
+    this.right = this.createInstance(
+      node.right,
+      entityMetadata,
+      params,
+      ExpressionType.BinaryExpression,
+    );
   }
   toString() {
     if (this.right instanceof LiteralExpression) {
@@ -308,9 +412,22 @@ export class BinaryExpression extends Expression {
       }
     }
 
-    return `${this.left.toString()}${
+    let compileStr = `${this.left.toString()}${
       OperatorConvertMapping.currentConvert[this.operator] ?? this.operator
     }${this.right.toString()}`;
+    if (ConfigUtil.get('dbType') == 'mysql') {
+      if (this.operator == '+') {
+        //case:a.name+a.title+'||'+b.name
+        if (this.parentNodeType == ExpressionType.BinaryExpression) {
+          compileStr = `${this.left.toString()},${this.right.toString()}`;
+        } else {
+          //outmost binary expression
+          //for mysql:finale use concat connect wrap all fields
+          compileStr = `CONCAT(${this.left.toString()},${this.right.toString()})`;
+        }
+      }
+    }
+    return compileStr;
   }
 }
 /**
@@ -328,11 +445,13 @@ export class UnaryExpression extends Expression {
   ) {
     super(node, entityMetadata, params, parentNodeType);
     this.type = ExpressionType.UnaryExpression;
-    this.argument = <typeof this.argument>this.createInstance(
-      node.argument,
-      entityMetadata,
-      params,
-      ExpressionType.UnaryExpression,
+    this.argument = <typeof this.argument>(
+      this.createInstance(
+        node.argument,
+        entityMetadata,
+        params,
+        ExpressionType.UnaryExpression,
+      )
     );
   }
   toString() {
@@ -350,13 +469,27 @@ export class UnaryExpression extends Expression {
  */
 export class BlockStatementExpression extends Expression {
   body!: LabeldStatementExpression[];
-  constructor(node: any, entityMetadata: MetadataType, params?: Expression[]) {
-    super(node, entityMetadata, params);
+  constructor(
+    node: any,
+    entityMetadata: MetadataType,
+    params?: Expression[],
+    parentNodeType?: ExpressionType,
+  ) {
+    super(node, entityMetadata, params, parentNodeType);
     this.type = ExpressionType.BlockStatementExpression;
     if (Array.isArray(node.body)) {
       this.body = [];
       (<[]>node.body).forEach((o) => {
-        this.body.push(<LabeldStatementExpression>this.createInstance(o, entityMetadata, params));
+        this.body.push(
+          <LabeldStatementExpression>(
+            this.createInstance(
+              o,
+              entityMetadata,
+              params,
+              ExpressionType.BlockStatementExpression,
+            )
+          ),
+        );
       });
     }
   }
@@ -370,26 +503,63 @@ export class BlockStatementExpression extends Expression {
 export class LabeldStatementExpression extends Expression {
   label: IdentityExpression;
   body: ExpressionStatementExpression;
-  constructor(node: any, entityMetadata: MetadataType, params?: Expression[]) {
-    super(node, entityMetadata, params);
+  constructor(
+    node: any,
+    entityMetadata: MetadataType,
+    params?: Expression[],
+    parentNodeType?: ExpressionType,
+  ) {
+    super(node, entityMetadata, params, parentNodeType);
     this.type = ExpressionType.LabeldStatementExpression;
-    this.label = <typeof this.label>this.createInstance(node.label, entityMetadata, params);
-    this.body = <typeof this.body>this.createInstance(node.body, entityMetadata, params);
+    this.label = <typeof this.label>(
+      this.createInstance(
+        node.label,
+        entityMetadata,
+        params,
+        ExpressionType.LabeldStatementExpression,
+      )
+    );
+    this.body = <typeof this.body>(
+      this.createInstance(
+        node.body,
+        entityMetadata,
+        params,
+        ExpressionType.LabeldStatementExpression,
+      )
+    );
   }
   toString() {
     // eg mssql entity.name name会报错 修正为entity.name "name"
     return ` ${this.body.toString()} "${this.label.name}"`;
   }
 }
+/**
+ * ```js
+ * {
+ * //entity1.name+entity2.name; is ExpressionStatementExpression
+ * a:entity1.name+entity2.name;
+ * //entity.title; is ExpressionStatementExpression
+ * b:entity.title;
+ * }
+ * ```
+ */
 export class ExpressionStatementExpression extends Expression {
   expression: BinaryExpression | MemberExpression; //暂时只考虑a+b 和a的情况，
-  constructor(node: any, entityMetadata: MetadataType, params?: Expression[]) {
-    super(node, entityMetadata, params);
+  constructor(
+    node: any,
+    entityMetadata: MetadataType,
+    params?: Expression[],
+    parentNodeType?: ExpressionType,
+  ) {
+    super(node, entityMetadata, params, parentNodeType);
     this.type = ExpressionType.ExpressionStatementExpression;
-    this.expression = <typeof this.expression>this.createInstance(
-      node.expression,
-      entityMetadata,
-      params,
+    this.expression = <typeof this.expression>(
+      this.createInstance(
+        node.expression,
+        entityMetadata,
+        params,
+        ExpressionType.ExpressionStatementExpression,
+      )
     );
   }
   toString() {
@@ -402,8 +572,13 @@ export class ExpressionStatementExpression extends Expression {
 export class LiteralExpression extends Expression {
   value: any;
   raw: string;
-  constructor(node: any, entityMetadata: MetadataType, params?: Expression[]) {
-    super(node, entityMetadata, params);
+  constructor(
+    node: any,
+    entityMetadata: MetadataType,
+    params?: Expression[],
+    parentNodeType?: ExpressionType,
+  ) {
+    super(node, entityMetadata, params, parentNodeType);
     this.type = ExpressionType.LiteralExpression;
     this.value = node.value;
     this.raw = node.raw;
@@ -429,8 +604,8 @@ export class MSSQLOperatorConvert extends OperatorConvert {
   'true' = '1';
   'false' = '0';
   like = (value: string) => `%${value}%`;
-  startWith = (value: string) => `${value}%`;
-  endWith = (value: string) => `%${value}`;
+  startsWith = (value: string) => `${value}%`;
+  endsWith = (value: string) => `%${value}`;
 }
 export class PostgresOperatorConvert extends OperatorConvert {
   '==' = '=';
@@ -448,14 +623,27 @@ export class PostgresOperatorConvert extends OperatorConvert {
     const newValue = value.replace(/([_%])/, `${escapeChar}$1`);
     return `%${newValue}%`;
   };
-  startWith = (value: string) => `${value}%`;
-  endWith = (value: string) => `%${value}`;
+  startsWith = (value: string) => `${value}%`;
+  endsWith = (value: string) => `%${value}`;
   ilike = (value: string) => {
     const dbType = <'postgres'>ConfigUtil.get('dbType');
     const escapeChar = SqlKeyMapping.escapeChar[dbType || 'mssql'] || '';
     const newValue = value.replace(/([_%])/, `${escapeChar}$1`);
     return `%${newValue}%`;
   };
+}
+export class MySQLOperationConvert extends OperatorConvert {
+  '==' = '=';
+  '===' = '=';
+  '!==' = '<>';
+  '!=' = '<>';
+  '||' = ' or ';
+  '&&' = ' and ';
+  'true' = 'true';
+  'false' = 'false';
+  like = (value: string) => `%${value}%`;
+  startsWith = (value: string) => `${value}%`;
+  endsWith = (value: string) => `%${value}`;
 }
 /**
 
@@ -466,8 +654,8 @@ export class PostgresOperatorConvert extends OperatorConvert {
 export const SqlKeyMapping = {
   like: {
     mssql: 'like',
-
     postgres: 'ilike',
+    mysql: 'like',
   },
   escapeChar: {
     mssql: '/',
@@ -475,7 +663,6 @@ export const SqlKeyMapping = {
   },
   escape: {
     mssql: `escape '/'`,
-
     postgres: `escape '/'`,
   },
 };
@@ -483,13 +670,15 @@ export const SqlKeyMapping = {
  * prop is DATABASE_TYPE
  */
 export class OperatorConvertMapping {
-  static get currentConvert(): OperatorConvert {
+  static get currentConvert() {
     const dbType = ConfigUtil.get('dbType');
     switch (dbType) {
       case 'postgres':
         return new PostgresOperatorConvert();
       case 'mssql':
         return new MSSQLOperatorConvert();
+      case 'mysql':
+        return new MySQLOperationConvert();
       default:
         throw new Error(`UnSupport database ${dbType}`);
     }
@@ -509,7 +698,9 @@ export enum ExpressionType {
   LiteralExpression = 'Literal',
   UnaryExpression = 'UnaryExpression',
 }
-/**返回转换后的sql 聚合函数，返回any 是为了万一在箭头函数参加运算，类型有冲突*/
+/**
+ * return any just for type is unknown
+ */
 export class ExpressionAggregateFunc {
   static [key: string]: Function;
   static count(param: any): any {
@@ -529,6 +720,8 @@ export class ExpressionAggregateFunc {
     switch (dbType) {
       case 'postgres':
         return 'char_length';
+      case 'mysql':
+        return 'length';
       default:
         return 'len';
     }
@@ -545,16 +738,17 @@ export class ExpressionAggregateFunc {
    * @param type
    */
   static cast(value: any, type: string) {
-    switch (type) {
-      case 'int':
-        return <number>value;
-      case 'decimal':
-        return <number>value;
-      case 'nvarchar':
-        return <string>value;
-      case 'varchar':
-        return <string>value;
-    }
+    // switch (type) {
+    //   case 'int':
+    //     return <number>value;
+    //   case 'decimal':
+    //     return <number>value;
+    //   case 'nvarchar':
+    //     return <string>value;
+    //   case 'varchar':
+    //     return <string>value;
+    // }
+    return value;
   }
   /**
    * 获取第一个非空值
@@ -571,7 +765,7 @@ export class ExpressionAggregateFunc {
   }
   /**
    * 兼容一些复杂sql的片段,不能支持多数据库，一般不建议使用
-   * @param subQuery query片段，
+   * @param subQuery query can use column name or entity.property
    */
   static subQuery(subQuery: string) {
     return <any>subQuery;

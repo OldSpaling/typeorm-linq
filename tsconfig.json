@@ -9,7 +9,7 @@
     /* Modules */
     "module": "commonjs",
     "moduleResolution": "node",
-    "outDir":"./dist",
+    "outDir": "./dist",
     /* JavaScript Support */
     "allowJs": true,
     /* Emit */
@@ -28,6 +28,8 @@
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
     /* Completeness */
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+    "noImplicitAny": false
+  },
+  "exclude": ["./src/test", "node_modules", "dist", "**/*.js"]
 }

@@ -719,7 +719,7 @@ export class LinqInferQueryBuilder<
       const expressKey = expressionOriginalStr.replace(/\r\n[\s]+/g, '');
 
       //优先从缓存里获取
-      if (!ExpressionCache.getByKey(expressionOriginalStr)) {
+      if (!ExpressionCache.getByKey(expressKey)) {
         const expressionStr = <ArrowFunctionExpression>(
           (<any>acornParse(expressionOriginalStr, { ecmaVersion: 'latest' }))
             .body[0].expression

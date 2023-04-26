@@ -1,8 +1,5 @@
-/**
- * 对于一些用sql关键字命名的列，需要用双引号引起来，才能调用
- * - MSSQL:对于这些列不区分大小写
- * - POSTGRES:对于这些列区分大小写
- */
+import { ConfigUtil } from '../config/config';
+
 export class SqlIdentityMapping {
   private static identities = [
     'order',
@@ -27,11 +24,26 @@ export class SqlIdentityMapping {
     'min',
     'user',
   ];
-  static getColumnName(name: string) {
-    const lowerName = name.toLowerCase();
-    if (SqlIdentityMapping.identities.includes(lowerName)) {
-      return `"${name}"`;
+  // static getColumnName(name: string) {
+  //   const lowerName = name.toLowerCase();
+  //   if (SqlIdentityMapping.identities.includes(lowerName)) {
+  //     return `"${name}"`;
+  //   }
+  //   return name;
+  // }
+  /**
+   * 对于一些用sql关键字命名的列，需要用特殊符号引起来，才能调用
+   * - MSSQL: 用"
+   * - POSTGRES:用"
+   * - mysql:用`
+   */
+  static wrapDBField(field: string) {
+    const dbType = ConfigUtil.get('dbType');
+    switch (dbType) {
+      case 'mysql':
+        return `\`${field}\``;
+      default:
+        return `"${field}"`;
     }
-    return name;
   }
 }

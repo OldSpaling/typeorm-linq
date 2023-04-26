@@ -1,6 +1,7 @@
 # typeorm-linq
 
-typeorm-linq is a library that support linq base on typeorm `SelectQueryBuilder`
+typeorm-linq is a library that support linq base on typeorm `SelectQueryBuilder`.
+`SqlServer`,`Postgres` and `MySql` is supported. `Oracle` is on-going.
 
 ## Install
 
@@ -89,11 +90,12 @@ npm install typeorm-linq --save
 - Support variable
   - Object:the max deep level is 2.eg:a.b
     ```js
+    //param label just remove '.' and connect to camelCase after 1.1.0
     const school = { id: 2 };
     queryBuilder
       .create(SchoolEntity, 'sc')
       .where(({ sc }) => sc.id == school.id, {
-        schoolid: school.id, //param label just remove '.'
+        schoolId: school.id, 
       });
     ```
   - Basic Type
@@ -132,7 +134,7 @@ npm install typeorm-linq --save
   queryBuilder
     .create(SchoolEntity, 'sc')
     .where(({ sc }) => sc.name.includes(test), {
-      test: OperatorConvert.like(test),
+      test: OperatorConvertMapping.currentConvert.like(test),
     });
   ```
   - `()`, `==`、`===`、`!==`、`!=`、`||`、`&&`
@@ -224,7 +226,8 @@ npm install typeorm-linq --save
       }, 'from1')
       .where(({ from1 }) => from1.firstName == 'test');
   ```
-
+## OnGoing
+- support `Oracle`
 ## Besides
 
 The Reason of choosing Object Type as Arrow Function Params instead of Tuple is below: Tuple just can infer type,but cannot infer variable name.
