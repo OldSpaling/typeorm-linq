@@ -593,6 +593,24 @@ export class LiteralExpression extends Expression {
  */
 export class OperatorConvert {
   [key: string]: any;
+  like = (value: string) => {
+    const newValue = this.escape(value);
+    return `%${newValue}%`;
+  };
+  startsWith = (value: string) => {
+    const newValue = this.escape(value);
+    return `${newValue}%`;
+  };
+  endsWith = (value: string) => {
+    const newValue = this.escape(value);
+    return `%${newValue}`;
+  };
+  protected escape(value: string) {
+    const dbType = <'oracle'>ConfigUtil.get('dbType');
+    const escapeChar = SqlKeyMapping.escapeChar[dbType || 'mssql'] || '';
+    const newValue = value.replace(/([_%])/, `${escapeChar}$1`);
+    return newValue;
+  }
 }
 export class MSSQLOperatorConvert extends OperatorConvert {
   '==' = '=';
@@ -603,9 +621,6 @@ export class MSSQLOperatorConvert extends OperatorConvert {
   '&&' = ' and ';
   'true' = '1';
   'false' = '0';
-  like = (value: string) => `%${value}%`;
-  startsWith = (value: string) => `${value}%`;
-  endsWith = (value: string) => `%${value}`;
 }
 export class PostgresOperatorConvert extends OperatorConvert {
   '==' = '=';
@@ -617,20 +632,25 @@ export class PostgresOperatorConvert extends OperatorConvert {
   '+' = '||';
   'true' = 'true';
   'false' = 'false';
-  like = (value: string) => {
-    const dbType = <'postgres'>ConfigUtil.get('dbType');
-    const escapeChar = SqlKeyMapping.escapeChar[dbType || 'mssql'] || '';
-    const newValue = value.replace(/([_%])/, `${escapeChar}$1`);
-    return `%${newValue}%`;
-  };
-  startsWith = (value: string) => `${value}%`;
-  endsWith = (value: string) => `%${value}`;
   ilike = (value: string) => {
-    const dbType = <'postgres'>ConfigUtil.get('dbType');
-    const escapeChar = SqlKeyMapping.escapeChar[dbType || 'mssql'] || '';
-    const newValue = value.replace(/([_%])/, `${escapeChar}$1`);
+    const newValue = this.escape(value);
     return `%${newValue}%`;
   };
+}
+/**
+ * - like:case sensitive
+ * - string concat can use a||b or concat(a,b)
+ */
+export class OracleOperatorConvert extends OperatorConvert {
+  '==' = '=';
+  '===' = '=';
+  '!==' = '<>';
+  '!=' = '<>';
+  '||' = ' or ';
+  '&&' = ' and ';
+  '+' = '||';
+  'true' = '1';
+  'false' = '0';
 }
 export class MySQLOperationConvert extends OperatorConvert {
   '==' = '=';
@@ -641,9 +661,6 @@ export class MySQLOperationConvert extends OperatorConvert {
   '&&' = ' and ';
   'true' = 'true';
   'false' = 'false';
-  like = (value: string) => `%${value}%`;
-  startsWith = (value: string) => `${value}%`;
-  endsWith = (value: string) => `%${value}`;
 }
 /**
 
@@ -660,10 +677,12 @@ export const SqlKeyMapping = {
   escapeChar: {
     mssql: '/',
     postgres: '/',
+    oracle: '/',
   },
   escape: {
     mssql: `escape '/'`,
     postgres: `escape '/'`,
+    oracle: `escape '/'`,
   },
 };
 /**
@@ -677,8 +696,8 @@ export class OperatorConvertMapping {
         return new PostgresOperatorConvert();
       case 'mssql':
         return new MSSQLOperatorConvert();
-      case 'mysql':
-        return new MySQLOperationConvert();
+      case 'oracle':
+        return new OracleOperatorConvert();
       default:
         throw new Error(`UnSupport database ${dbType}`);
     }
@@ -721,6 +740,8 @@ export class ExpressionAggregateFunc {
       case 'postgres':
         return 'char_length';
       case 'mysql':
+        return 'length';
+      case 'oracle':
         return 'length';
       default:
         return 'len';
