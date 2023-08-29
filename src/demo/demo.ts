@@ -1,11 +1,11 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { SchoolEntity } from './entities/pg/school.entity';
+import { SchoolEntity } from './entities/mssql/school.entity';
 import { faker } from '@faker-js/faker';
-import { TeacherEntity } from './entities/pg/teacher.entity';
-import { ClassesEntity } from './entities/pg/classes.entity';
-import { CourseEntity } from './entities/pg/course.entity';
-import { StudentEntity } from './entities/pg/student.entity';
-import { StudentCourseMappingEntity } from './entities/pg/student-course_mapping.entity';
+import { TeacherEntity } from './entities/mssql/teacher.entity';
+import { ClassesEntity } from './entities/mssql/classes.entity';
+import { CourseEntity } from './entities/mssql/course.entity';
+import { StudentEntity } from './entities/mssql/student.entity';
+import { StudentCourseMappingEntity } from './entities/mssql/student-course_mapping.entity';
 import { LinqInferQueryBuilder } from '../linq';
 import { ExpressionAggregateFunc } from '../linq/parser/expression-parser';
 import { Actor, Film, FilmActor, Language } from './entities/mysql';
