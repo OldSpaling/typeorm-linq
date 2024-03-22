@@ -39,6 +39,7 @@ export class Test {
       schema: 'dbo',
       database: 'iDoctor',
       synchronize: true,
+      logging: true,
       options: {
         encrypt: false,
         // cryptoCredentialsDetails: {
@@ -64,7 +65,7 @@ export class Test {
     await this.mssqlDemo.initData();
   }
   async testQuery(demo: Demo) {
-    await demo.testJoinQuery();
+    await demo.testJoinQuery2();
   }
   async testMySql() {
     await this.mySqlDemo.testMySql();
@@ -73,5 +74,6 @@ export class Test {
 // new Test().initData().then((o) => console.log('init data'));
 init({ dbType: 'mssql' });
 const test = new Test();
+console.log('start');
 test.testQuery(test.mssqlDemo);
 // test.testMySql();

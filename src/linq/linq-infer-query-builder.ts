@@ -132,7 +132,19 @@ export class LinqInferQueryBuilder<
     this.queryBuilder.leftJoinAndSelect(target, alias, condition, parameters);
     return this;
   }
-
+  leftJoinAndSelect<T, A>(
+    target: { new (): T },
+    alias: string,
+    expression: ExpressionInferType<
+      boolean,
+      TInferType & LinqAliasInferType<A, T>
+    > | null,
+    propExpression: ExpressionInferType<
+      boolean,
+      TInferType & LinqAliasInferType<A, T>
+    >,
+    params?: ObjectLiteral,
+  ): LinqInferQueryBuilder<TEntity, TInferType & LinqAliasInferType<A, T>>;
   leftJoinAndSelect<T, A>(
     target: { new (): T },
     alias: LinqAliasKeyType<A>,
@@ -141,18 +153,48 @@ export class LinqInferQueryBuilder<
       TInferType & LinqAliasInferType<A, T>
     >,
     params?: ObjectLiteral,
+  ): LinqInferQueryBuilder<TEntity, TInferType & LinqAliasInferType<A, T>>;
+  leftJoinAndSelect<T, A>(
+    target: { new (): T },
+    alias: LinqAliasKeyType<A>,
+    expression: ExpressionInferType<
+      boolean,
+      TInferType & LinqAliasInferType<A, T>
+    > | null,
+    propExpression: ExpressionInferType<
+      boolean,
+      TInferType & LinqAliasInferType<A, T>
+    >,
+    params?: ObjectLiteral,
   ): LinqInferQueryBuilder<TEntity, TInferType & LinqAliasInferType<A, T>> {
-    const condition = this.parseExpression(
-      expression,
-      target.name,
-      alias || target.name,
-    );
-    this.queryBuilder.leftJoinAndSelect(
-      target,
-      alias || target.name,
-      condition,
-      params,
-    );
+    if (propExpression && typeof propExpression == 'function') {
+      const propertySelector = this.parseExpression(
+        propExpression,
+        target.name,
+        alias || target.name,
+      );
+      const condition = expression
+        ? this.parseExpression(expression, target.name, alias || target.name)
+        : null;
+      this.queryBuilder.leftJoinAndSelect(
+        propertySelector.replace(/"/g, ''),
+        alias,
+        condition,
+        params,
+      );
+    } else {
+      const condition = this.parseExpression(
+        expression,
+        target.name,
+        alias || target.name,
+      );
+      this.queryBuilder.leftJoinAndSelect(
+        target,
+        alias || target.name,
+        condition,
+        params,
+      );
+    }
     // type TempReturnType = LinqInferQueryBuilder<
     //   TEntity,
     //   TInferType & LinqAliasInferType<A, T>
@@ -172,25 +214,72 @@ export class LinqInferQueryBuilder<
     return this;
   }
   innerJoinAndSelect<T, A>(
-    target: new () => T,
+    target: { new (): T },
+    alias: string,
+    expression: ExpressionInferType<
+      boolean,
+      TInferType & LinqAliasInferType<A, T>
+    > | null,
+    propExpression: ExpressionInferType<
+      boolean,
+      TInferType & LinqAliasInferType<A, T>
+    >,
+    params?: ObjectLiteral,
+  ): LinqInferQueryBuilder<TEntity, TInferType & LinqAliasInferType<A, T>>;
+  innerJoinAndSelect<T, A>(
+    target: { new (): T },
     alias: LinqAliasKeyType<A>,
     expression: ExpressionInferType<
       boolean,
       TInferType & LinqAliasInferType<A, T>
     >,
     params?: ObjectLiteral,
+  ): LinqInferQueryBuilder<TEntity, TInferType & LinqAliasInferType<A, T>>;
+  innerJoinAndSelect<T, A>(
+    target: { new (): T },
+    alias: LinqAliasKeyType<A>,
+    expression: ExpressionInferType<
+      boolean,
+      TInferType & LinqAliasInferType<A, T>
+    > | null,
+    propExpression: ExpressionInferType<
+      boolean,
+      TInferType & LinqAliasInferType<A, T>
+    >,
+    params?: ObjectLiteral,
   ): LinqInferQueryBuilder<TEntity, TInferType & LinqAliasInferType<A, T>> {
-    const condition = this.parseExpression(
-      expression,
-      target.name,
-      alias || target.name,
-    );
-    this.queryBuilder.innerJoinAndSelect(
-      target,
-      alias || target.name,
-      condition,
-      params,
-    );
+    if (propExpression && typeof propExpression == 'function') {
+      const propertySelector = this.parseExpression(
+        propExpression,
+        target.name,
+        alias || target.name,
+      );
+      const condition = expression
+        ? this.parseExpression(expression, target.name, alias || target.name)
+        : null;
+      this.queryBuilder.innerJoinAndSelect(
+        propertySelector.replace(/"/g, ''),
+        alias,
+        condition,
+        params,
+      );
+    } else {
+      const condition = this.parseExpression(
+        expression,
+        target.name,
+        alias || target.name,
+      );
+      this.queryBuilder.innerJoinAndSelect(
+        target,
+        alias || target.name,
+        condition,
+        params,
+      );
+    }
+    // type TempReturnType = LinqInferQueryBuilder<
+    //   TEntity,
+    //   TInferType & LinqAliasInferType<A, T>
+    // >;
     return this;
   }
   baseSubQueryLeftJoinAndSelect<T, A>(

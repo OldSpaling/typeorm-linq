@@ -181,6 +181,18 @@ export class Demo {
         "stu"."classes_id"="cla"."id"  LEFT JOIN "public"."teacher" "te" ON "cla"."head_teacher_id"="te"."id" WHERE ( ("stu"."is_male" =false and "cla"."name"='8')  or "stu"."is_header"=true)
        */
   }
+  async testJoinQuery2() {
+    const dataSource = await this.createConn();
+    const query = await new LinqInferQueryBuilder<StudentEntity>(dataSource)
+      .create(StudentEntity, 'student')
+      .innerJoinAndSelect(
+        ClassesEntity,
+        'classes1',
+        null,
+        ({ student }) => student.classes,
+      )
+      .getMany();
+  }
   async testMySql() {
     const dataSource = await this.createConn();
     const youngLanguage = 'YOUNG LANGUAGE';
@@ -213,7 +225,7 @@ export class Demo {
         actorName: ac.firstName + ' ' + ac.lastName;
         language: l.name;
       })
-      .getRawMany<{filmName:string,actorName:string,language:string}>();
+      .getRawMany<{ filmName: string; actorName: string; language: string }>();
     console.log(query);
   }
   async testLinqFrom() {
