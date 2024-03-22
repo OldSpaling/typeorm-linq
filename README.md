@@ -87,6 +87,18 @@ npm install typeorm-linq --save
       ({ cla1, cla2 }) => sc.id == cla.parentId,
     );
   ```
+- Support join with relations
+```js
+   const query = await new LinqInferQueryBuilder<StudentEntity>(dataSource)
+      .create(StudentEntity, 'student')
+      .innerJoinAndSelect(
+        ClassesEntity,
+        'classes1',
+        null,
+        ({ student }) => student.classes,
+      )
+      .getMany();
+```
 - Support variable
   - Object:the max deep level is 2.eg:a.b
     ```js
