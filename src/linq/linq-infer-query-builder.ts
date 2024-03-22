@@ -140,7 +140,7 @@ export class LinqInferQueryBuilder<
       TInferType & LinqAliasInferType<A, T>
     > | null,
     propExpression: ExpressionInferType<
-      boolean,
+      T,
       TInferType & LinqAliasInferType<A, T>
     >,
     params?: ObjectLiteral,
@@ -221,7 +221,7 @@ export class LinqInferQueryBuilder<
       TInferType & LinqAliasInferType<A, T>
     > | null,
     propExpression: ExpressionInferType<
-      boolean,
+      T,
       TInferType & LinqAliasInferType<A, T>
     >,
     params?: ObjectLiteral,

@@ -190,6 +190,7 @@ export class Demo {
         'classes1',
         null,
         ({ student }) => student.classes,
+        null
       )
       .getMany();
   }
