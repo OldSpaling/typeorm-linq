@@ -88,17 +88,23 @@ npm install typeorm-linq --save
     );
   ```
 - Support join with relations
+
 ```js
-   const query = await new LinqInferQueryBuilder<StudentEntity>(dataSource)
-      .create(StudentEntity, 'student')
-      .innerJoinAndSelect(
-        ClassesEntity,
-        'classes1',
-        null,
-        ({ student }) => student.classes,
-      )
-      .getMany();
+const query =
+  (await new LinqInferQueryBuilder()) <
+  StudentEntity >
+  dataSource
+    .create(StudentEntity, 'student')
+    .innerJoinAndSelect(
+      ClassesEntity,
+      'classes1',
+      null,
+      ({ student }) => student.classes,
+      null,
+    )
+    .getMany();
 ```
+
 - Support variable
   - Object:the max deep level is 2.eg:a.b
     ```js
@@ -107,7 +113,7 @@ npm install typeorm-linq --save
     queryBuilder
       .create(SchoolEntity, 'sc')
       .where(({ sc }) => sc.id == school.id, {
-        schoolId: school.id, 
+        schoolId: school.id,
       });
     ```
   - Basic Type
@@ -238,8 +244,11 @@ npm install typeorm-linq --save
       }, 'from1')
       .where(({ from1 }) => from1.firstName == 'test');
   ```
+
 ## OnGoing
+
 - support `Oracle`
+
 ## Besides
 
 The Reason of choosing Object Type as Arrow Function Params instead of Tuple is below: Tuple just can infer type,but cannot infer variable name.

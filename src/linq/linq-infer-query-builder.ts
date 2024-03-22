@@ -215,7 +215,7 @@ export class LinqInferQueryBuilder<
   }
   innerJoinAndSelect<T, A>(
     target: { new (): T },
-    alias: string,
+    alias: LinqAliasKeyType<A>,
     expression: ExpressionInferType<
       boolean,
       TInferType & LinqAliasInferType<A, T>
