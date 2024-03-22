@@ -184,13 +184,13 @@ export class Demo {
   async testJoinQuery2() {
     const dataSource = await this.createConn();
     const query = await new LinqInferQueryBuilder<StudentEntity>(dataSource)
-      .create(StudentEntity, 'student')
+      .create(StudentEntity, 'student1')
       .innerJoinAndSelect(
         ClassesEntity,
         'classes1',
         null,
-        ({ student }) => student.classes,
-        null
+        ({ student1 }) => student1.classes,
+        null,
       )
       .getMany();
   }
