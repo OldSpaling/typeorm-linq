@@ -574,14 +574,33 @@ export class LinqInferQueryBuilder<
     this.queryBuilder.addOrderBy(condition, order, nulls);
     return this;
   }
+  select(): this;
+  /**
+   * instead of select(["a.firstName","b.name"])
+   * @param expression
+   */
+  select(expression: ExpressionInferType<void, TInferType>[]): this;
+  select(expression: ExpressionInferType<void, TInferType>): this;
   /**
    *
    * @description 不建议参数传空全字段查询
    */
-  select(expression?: ExpressionInferType<void, TInferType>) {
+  select(
+    expression?:
+      | ExpressionInferType<void, TInferType>
+      | ExpressionInferType<void, TInferType>[],
+  ) {
     if (expression) {
-      const condition = this.parseExpression(expression);
-      this.queryBuilder.select(condition);
+      if (typeof expression == 'function') {
+        const condition = this.parseExpressionSelectBody(expression);
+        this.queryBuilder.select(condition);
+      } else if (Array.isArray(expression)) {
+        const conditions = expression.map((o) => {
+          const condition = this.parseExpressionSelectBody(o);
+          return condition.replace(/"/g, '');
+        });
+        this.queryBuilder.select(conditions);
+      }
     } else {
       this.queryBuilder.expressionMap.selects =
         this.queryBuilder.expressionMap.aliases.map((o) => {
@@ -593,13 +612,36 @@ export class LinqInferQueryBuilder<
     this.isSelect = false;
     return this;
   }
-  addSelect(expression: ExpressionInferType<void, TInferType>) {
-    if (this.isSelect) {
-      return this.select(expression);
-    } else {
-      const condition = this.parseExpression(expression);
-      this.queryBuilder.addSelect(condition);
-      return this;
+  /**
+   * instead of addSelect(["a.firstName","b.name"])
+   * @param expression
+   */
+  addSelect(expression: ExpressionInferType<void, TInferType>[]): this;
+  addSelect(expression: ExpressionInferType<void, TInferType>): this;
+  addSelect(
+    expression:
+      | ExpressionInferType<void, TInferType>
+      | ExpressionInferType<void, TInferType>[],
+  ) {
+    if (typeof expression == 'function') {
+      if (this.isSelect) {
+        return this.select(expression);
+      } else {
+        const condition = this.parseExpressionSelectBody(expression);
+        this.queryBuilder.addSelect(condition);
+        return this;
+      }
+    } else if (Array.isArray(expression)) {
+      if (this.isSelect) {
+        return this.select(expression);
+      } else {
+        const conditions = expression.map((o) => {
+          const condition = this.parseExpressionSelectBody(o);
+          return condition.replace(/"/g, '');
+        });
+        this.queryBuilder.addSelect(conditions);
+        return this;
+      }
     }
   }
   distinct(distinct?: boolean) {
@@ -837,5 +879,9 @@ export class LinqInferQueryBuilder<
       }
     }
     return condition;
+  }
+  private parseExpressionSelectBody(express: { toString: () => string }) {
+    const str = express.toString();
+    return str.substring(str.indexOf('>') + 1).trim();
   }
 }

@@ -192,6 +192,16 @@ export class Demo {
         ({ student1 }) => student1.classes,
         null,
       )
+      .select([
+        ({ student1 }) => student1.id,
+        ({ student1 }) => student1.firstName,
+        ({ classes1 }) => classes1.id,
+        ({ classes1 }) => classes1.name,
+      ])
+      .addSelect([
+        ({ student1 }) => student1.address,
+        ({classes1})=>classes1.schoolId
+      ])
       .getMany();
   }
   async testMySql() {

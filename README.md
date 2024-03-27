@@ -230,6 +230,7 @@ const query =
   );
   ```
 - from
+
   ```js
   new LinqInferQueryBuilder() <
     SchoolEntity >
@@ -243,6 +244,33 @@ const query =
         return subQuery;
       }, 'from1')
       .where(({ from1 }) => from1.firstName == 'test');
+  ```
+
+  - select/addSelect
+
+  ```js
+  (await new LinqInferQueryBuilder()) <
+    StudentEntity >
+    dataSource
+      .create(StudentEntity, 'student1')
+      .leftJoinAndSelect(
+        ClassesEntity,
+        'classes1',
+        null,
+        ({ student1 }) => student1.classes,
+        null,
+      )
+      .select([
+        ({ student1 }) => student1.id,
+        ({ student1 }) => student1.firstName,
+        ({ classes1 }) => classes1.id,
+        ({ classes1 }) => classes1.name,
+      ])
+      .addSelect([
+        ({ student1 }) => student1.address,
+        ({ classes1 }) => classes1.schoolId,
+      ])
+      .getMany();
   ```
 
 ## OnGoing
