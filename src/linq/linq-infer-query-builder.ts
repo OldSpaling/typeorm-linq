@@ -592,7 +592,7 @@ export class LinqInferQueryBuilder<
   ) {
     if (expression) {
       if (typeof expression == 'function') {
-        const condition = this.parseExpressionSelectBody(expression);
+        const condition = this.parseExpression(expression);
         this.queryBuilder.select(condition);
       } else if (Array.isArray(expression)) {
         const conditions = expression.map((o) => {
@@ -627,7 +627,7 @@ export class LinqInferQueryBuilder<
       if (this.isSelect) {
         return this.select(expression);
       } else {
-        const condition = this.parseExpressionSelectBody(expression);
+        const condition = this.parseExpression(expression);
         this.queryBuilder.addSelect(condition);
         return this;
       }
