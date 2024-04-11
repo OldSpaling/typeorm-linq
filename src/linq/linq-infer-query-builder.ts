@@ -161,15 +161,15 @@ export class LinqInferQueryBuilder<
       boolean,
       TInferType & LinqAliasInferType<A, T>
     > | null,
-    propExpression: ExpressionInferType<
+    propExpressionOrParams: ExpressionInferType<
       boolean,
       TInferType & LinqAliasInferType<A, T>
-    >,
+    >|ObjectLiteral|null,
     params?: ObjectLiteral,
   ): LinqInferQueryBuilder<TEntity, TInferType & LinqAliasInferType<A, T>> {
-    if (propExpression && typeof propExpression == 'function') {
+    if (propExpressionOrParams && typeof propExpressionOrParams == 'function') {
       const propertySelector = this.parseExpression(
-        propExpression,
+        propExpressionOrParams,
         target.name,
         alias || target.name,
       );
@@ -192,7 +192,7 @@ export class LinqInferQueryBuilder<
         target,
         alias || target.name,
         condition,
-        params,
+        propExpressionOrParams,
       );
     }
     // type TempReturnType = LinqInferQueryBuilder<
@@ -245,7 +245,7 @@ export class LinqInferQueryBuilder<
     propExpression: ExpressionInferType<
       boolean,
       TInferType & LinqAliasInferType<A, T>
-    >,
+    >|ObjectLiteral|null,
     params?: ObjectLiteral,
   ): LinqInferQueryBuilder<TEntity, TInferType & LinqAliasInferType<A, T>> {
     if (propExpression && typeof propExpression == 'function') {
@@ -273,7 +273,7 @@ export class LinqInferQueryBuilder<
         target,
         alias || target.name,
         condition,
-        params,
+        propExpression,
       );
     }
     // type TempReturnType = LinqInferQueryBuilder<

@@ -135,13 +135,14 @@ export class Demo {
   }
   async testJoinQuery() {
     const dataSource = await this.createConn();
-    const schoolFilter = { id: 1 };
+    const schoolFilter = { id: 6 };
     const query = await new LinqInferQueryBuilder<SchoolEntity>(dataSource)
       .create(SchoolEntity, 'sc')
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         ClassesEntity,
         'cla',
-        ({ sc, cla }) => sc.id == cla.schoolId,
+        ({ sc, cla }) => sc.id == cla.schoolId && sc.id == schoolFilter.id,
+        { schoolFilterId: schoolFilter.id },
       )
       .leftJoinAndSelect(
         StudentEntity,
@@ -156,7 +157,7 @@ export class Demo {
       .where(
         ({ cla, stu }) =>
           (!stu.isMale && ExpressionAggregateFunc.len(cla.name) >= 0) ||
-          ExpressionAggregateFunc.subQuery('stu.is_header == true'),
+          ExpressionAggregateFunc.subQuery('stu.is_header = 1'),
       )
       .andWhere(({ sc }) => sc.id == schoolFilter.id, {
         schoolFilterid: schoolFilter.id, //参数名是单纯层级合并
@@ -168,13 +169,13 @@ export class Demo {
         headTeacher: te.firstName + ' ' + te.lastName;
         stuName: stu.firstName + ' ' + stu.lastName;
       })
-      .toSql();
-    // .getRawMany<{
-    //   schoolName: string;
-    //   className: string;
-    //   headTeacher: string;
-    //   stuName: string;
-    // }>();
+      // .toSql();
+      .getRawMany<{
+        schoolName: string;
+        className: string;
+        headTeacher: string;
+        stuName: string;
+      }>();
     console.log(query);
     /**
        * SELECT  "sc"."name" "schoolName", "cla"."name" "className", "te"."first_name"||' '||"te"."last_name" "headTeacher", "stu"."first_name"||' '||"stu"."last_name" "stuName" FROM "public"."school" "sc" INNER JOIN "public"."classes" "cla" ON "sc"."id"="cla"."school_id"  LEFT JOIN "public"."student" "stu" ON 
@@ -200,7 +201,7 @@ export class Demo {
       ])
       .addSelect([
         ({ student1 }) => student1.address,
-        ({classes1})=>classes1.schoolId
+        ({ classes1 }) => classes1.schoolId,
       ])
       .getMany();
   }

@@ -65,7 +65,7 @@ export class Test {
     await this.mssqlDemo.initData();
   }
   async testQuery(demo: Demo) {
-    await demo.testJoinQuery2();
+    await demo.testJoinQuery();
   }
   async testMySql() {
     await this.mySqlDemo.testMySql();
