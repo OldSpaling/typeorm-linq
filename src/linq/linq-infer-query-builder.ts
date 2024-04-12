@@ -161,17 +161,15 @@ export class LinqInferQueryBuilder<
       boolean,
       TInferType & LinqAliasInferType<A, T>
     > | null,
-    propExpressionOrParams: ExpressionInferType<
-      boolean,
-      TInferType & LinqAliasInferType<A, T>
-    >|ObjectLiteral|null,
+    propExpressionOrParams:
+      | ExpressionInferType<boolean, TInferType & LinqAliasInferType<A, T>>
+      | ObjectLiteral
+      | null,
     params?: ObjectLiteral,
   ): LinqInferQueryBuilder<TEntity, TInferType & LinqAliasInferType<A, T>> {
     if (propExpressionOrParams && typeof propExpressionOrParams == 'function') {
-      const propertySelector = this.parseExpression(
+      const propertySelector = this.parseExpressionSelectBody(
         propExpressionOrParams,
-        target.name,
-        alias || target.name,
       );
       const condition = expression
         ? this.parseExpression(expression, target.name, alias || target.name)
@@ -242,17 +240,15 @@ export class LinqInferQueryBuilder<
       boolean,
       TInferType & LinqAliasInferType<A, T>
     > | null,
-    propExpression: ExpressionInferType<
-      boolean,
-      TInferType & LinqAliasInferType<A, T>
-    >|ObjectLiteral|null,
+    propExpression:
+      | ExpressionInferType<boolean, TInferType & LinqAliasInferType<A, T>>
+      | ObjectLiteral
+      | null,
     params?: ObjectLiteral,
   ): LinqInferQueryBuilder<TEntity, TInferType & LinqAliasInferType<A, T>> {
     if (propExpression && typeof propExpression == 'function') {
-      const propertySelector = this.parseExpression(
+      const propertySelector = this.parseExpressionSelectBody(
         propExpression,
-        target.name,
-        alias || target.name,
       );
       const condition = expression
         ? this.parseExpression(expression, target.name, alias || target.name)
